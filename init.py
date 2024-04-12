@@ -1,13 +1,12 @@
 import sqlite3
 import bcrypt
-from remove_duplicates import remove_duplicates
 
 def sys_init():
     # Connect to an SQLite database
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
-    # Create a table if it doesn't exist
+    # Create tables if they don't exist
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
@@ -18,17 +17,29 @@ def sys_init():
             email TEXT,
             phone TEXT,
             user_type TEXT
-        )
-    ''')
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS items (
-            item INTEGER PRIMARY KEY,
-            title TEXT,
-            type TEXT,
-            status TEXT
-        )
+        );
     ''')
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS items (
+            item_id INTEGER PRIMARY KEY,
+            title TEXT,
+            type TEXT,
+            availability TEXT
+        );
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS checkouts (
+            checkout_id INTEGER PRIMARY KEY,
+            user_id INTEGER,
+            item_id INTEGER,
+            checkout_date TEXT,
+            return_date TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(user_id),
+            FOREIGN KEY (item_id) REFERENCES items(item_id)
+        );
+    ''')
 
     # Insert some dummy data with hashed passwords
     password1_hash = bcrypt.hashpw(b'secret1', bcrypt.gensalt())
@@ -42,12 +53,26 @@ def sys_init():
         ('user2', password2_hash, 'Jane', 'Smith', 'jane@example.com',
          '0987654321', 'patron'))
 
+    # Insert some dummy data into items table
+    cursor.execute(
+        "INSERT INTO items (title, type, availability) VALUES (?, ?, ?)",
+        ('Book1', 'Book', 'Available'))
+    cursor.execute(
+        "INSERT INTO items (title, type, availability) VALUES (?, ?, ?)",
+        ('DVD1', 'DVD', 'Available'))
+
+    # Insert some dummy data into checkouts table
+    cursor.execute(
+        "INSERT INTO checkouts (user_id, item_id, checkout_date, return_date) VALUES (?, ?, ?, ?)",
+        (1, 1, '2024-04-10', '2024-04-20'))
+    cursor.execute(
+        "INSERT INTO checkouts (user_id, item_id, checkout_date, return_date) VALUES (?, ?, ?, ?)",
+        (2, 2, '2024-04-10', '2024-04-20'))
+
     # Commit the changes
     conn.commit()
 
     # Close the connection
     conn.close()
 
-
 sys_init()
-

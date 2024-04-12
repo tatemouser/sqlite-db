@@ -6,7 +6,7 @@
     <title>Profile</title>
     <style>
         body {
-            background-color: red;
+            background-color: rgb(226, 173, 173);
         }
     </style>
 </head>
@@ -17,7 +17,9 @@
     <p>Last Name: {{user_info.last_name}}</p>
     <p>Email: {{user_info.email}}</p>
     <p>Phone: {{user_info.phone}}</p>
-    <p>Is_Librarian: {{user_info.is_librarian}}</p>
+    <p>user_type: {{user_info.user_type}}</p>
     <a href="/logout">Logout</a>
+
+    <a href="/search" class="btn">Search</a>
 </body>
 </html>

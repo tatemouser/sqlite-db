@@ -8,6 +8,12 @@ def delete_all_data():
     try:
         # Delete all rows from the users table
         cursor.execute("DELETE FROM users")
+
+        # Delete all rows from the items table
+        cursor.execute("DELETE FROM items")
+
+        # Delete all rows from the checkouts table
+        cursor.execute("DELETE FROM checkouts")
         
         # Commit the changes
         conn.commit()

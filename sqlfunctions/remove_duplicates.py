@@ -6,13 +6,33 @@ def remove_duplicates():
         conn = sqlite3.connect('users.db')
         cursor = conn.cursor()
 
-        # Find duplicate usernames and keep the one with the lowest ID
+        # Remove duplicates from the users table
         cursor.execute('''
             DELETE FROM users
             WHERE user_id NOT IN (
                 SELECT MIN(user_id)
                 FROM users
                 GROUP BY username
+            )
+        ''')
+
+        # Remove duplicates from the items table
+        cursor.execute('''
+            DELETE FROM items
+            WHERE item_id NOT IN (
+                SELECT MIN(item_id)
+                FROM items
+                GROUP BY title, type
+            )
+        ''')
+
+        # Remove duplicates from the checkouts table
+        cursor.execute('''
+            DELETE FROM checkouts
+            WHERE checkout_id NOT IN (
+                SELECT MIN(checkout_id)
+                FROM checkouts
+                GROUP BY user_id, item_id
             )
         ''')
 
