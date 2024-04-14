@@ -104,5 +104,62 @@ def search():
         else:
             return "Error: User information not found"
 
+
+@app.route('/filter', methods=['POST'])
+def filter_items():
+    item_type = request.form['item_type']
+    
+    # Query the database for items of the selected type
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM items WHERE type = ?", (item_type,))
+    items = cursor.fetchall()
+    conn.close()
+    
+    # Render the filtered items
+    user_data = session.get('user')
+    if user_data:
+        return render_template('search.html', user_info=user_data, items=items)
+    else:
+        return "Error: User information not found"
+    
+
+@app.route('/checkout', methods=['POST'])
+def checkout():
+    checked_items = request.form.getlist('checked_items')
+    
+    if not checked_items:
+        return "No items selected for checkout."
+    6
+    # Update the status of checked items to 'Not Available'
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    for item_id in checked_items:
+        cursor.execute("UPDATE items SET availability = ? WHERE item_id = ?", ('Not Available', item_id))
+        
+    conn.commit()
+    conn.close()
+    
+    # Redirect back to the search page after checkout
+    return redirect('/search')
+
+
+@app.route('/show_all_users', methods=['POST'])
+def show_all_users():
+    # Query all users from the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users")
+    items = cursor.fetchall()
+    conn.close()
+    
+    # Render the users
+    user_data = session.get('user')
+    if user_data:
+        return render_template('search.html', user_info=user_data, items=items)
+    else:
+        return "Error: User information not found"
+
+
 if __name__ == '__main__':
     app.run(debug=True)

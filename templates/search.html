@@ -4,87 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Search</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
 </head>
 <body>
     <h1>Library Search</h1>
     <hr>
-    <h3>Search Items</h3>
-    <form action="/search" method="POST">
-        <input type="text" name="title" placeholder="Enter book title...">
-        <button type="submit">Search</button>
+    <form action="/filter" method="POST">
+        <div class="horizontal-stack">
+            <p>Search</p>
+            <button type="submit" name="item_type" value="Book">See All Books</button>
+            <button type="submit" name="item_type" value="DVD">See All DVDs</button>
+            <button type="submit" name="item_type" value="CD">See All CDs</button>
+            <button type="submit" name="item_type" value="CD">See All Checked Out</button>
+        </div>
     </form>
-    <!-- Display search results -->
-    {% if items %}
-        <h2>Search Results</h2>
-        <ul>
-            {% for item in items %}
-                <li>{{ item.title }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-
-
-
-    
-    <h3>Checkout Items</h3>
     <form action="/search" method="POST">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title">
-        
-        <button type="submit">Search</button>
+        <div class="horizontal-stack">
+            <p>Quick Search</p>
+            <input type="text" name="title" placeholder="Enter title...">
+            <button type="submit">Search By Item</button>
+        </div>
     </form>
-    <h3>Display Checked Out Items</h3>
-    <form action="/search" method="POST">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title">
-        
-        <button type="submit">Search</button>
-    </form>
+
     <hr>
+    <h2>Advanced</h2>
 
 
-
-    <!-- Conditional rendering based on user type -->
     <!-- Special features -->
     {% if user_info.user_type == 'librarian' %}
-    <h3>Add Librarian Or Patron</h3>
-    <form action="/search" method="POST">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title">
-        
-        <button type="submit">Search</button>
-    </form>
 
-    <h3>Add Library Items</h3>
-    <form action="/search" method="POST">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title">
-        
-        <button type="submit">Search</button>
-    </form>
+    <div class="horizontal-stack">
+        <p>Update</p>
+        <button type="submit">Add Librarian</button>
+        <button type="submit">Add Patron</button>
+        <button type="submit">Add Item</button>
+    </div>
+    
+    <div class="horizontal-stack">
+    <p>Display All Users</p>
+        <form action="/show_all_users" method="POST">
+            <button type="submit">See All Users</button>
+        </form>
+    </div>
+    
+    <div class="horizontal-stack">
+        <p>Check Patron Items</p>
+        <input type="text" name="title" placeholder="ID">
+        <button type="submit">Find User</button>
+    </div>
 
-    <h3>Display All Users</h3>
-    <form action="/search" method="POST">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title">
-        
-        <button type="submit">Search</button>
-    </form>
 
-    <h3>Search User By Library ID and see checked out items</h3>
-    <form action="/search" method="POST">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title">
-        
-        <button type="submit">Search</button>
-    </form>
+
 
     {% elif user_info.user_type == 'patron' %}
     <!-- TODO: Prolly remove -->
     {% else %}
     <p>Error: Unknown user type</p>
     {% endif %}
+
+
+
+
+    {% if items %}
+        <h2>Search Results</h2>
+        <div class="search-results-box">
+            <form action="/checkout" method="POST">
+                <ol>
+                    {% for item in items %}
+                        <li>
+                            <input type="checkbox" name="checked_items" value="{{ item.item_id }}">
+                            {{ item.title }} - {% if item.availability == 'Available' %}Available{% else %}Not Available{% endif %}
+                        </li>
+                    {% endfor %}
+                </ol>
+                <button type="submit">Checkout</button>
+            </form>
+        </div>
+    {% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     
     
