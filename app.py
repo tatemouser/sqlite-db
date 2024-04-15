@@ -130,7 +130,7 @@ def checkout():
     
     if not checked_items:
         return "No items selected for checkout."
-    6
+    
     # Update the status of checked items to 'Not Available'
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -145,20 +145,60 @@ def checkout():
 
 
 @app.route('/show_all_users', methods=['POST'])
-def show_all_users():
-    # Query all users from the database
+def filter_items():
+    user_type = request.form['user_type']
+    
+    # Query the database for items of the selected type
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users")
-    items = cursor.fetchall()
+    users = cursor.fetchall()
     conn.close()
     
-    # Render the users
+    # Render the filtered items
     user_data = session.get('user')
     if user_data:
-        return render_template('search.html', user_info=user_data, items=items)
+        return render_template('search.html')
     else:
         return "Error: User information not found"
+
+@app.route('/add_item', methods=['POST'])
+def add_item():
+    # Get the form data
+    title = request.form.get('title')
+    item_type = request.form.get('type')
+    availability = request.form.get('availability', 'Available')  # Default to 'Available' if not provided
+
+    # Insert the new item into the items table
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO items (title, type, availability) VALUES (?, ?, ?)", (title, item_type, availability))
+    conn.commit()
+    conn.close()
+
+    # Redirect to the same page or another page
+    return redirect('/search')  # Adjust the URL as needed
+
+@app.route('/add_user', methods=['POST'])
+def user():
+    # Get the form data
+    username = request.form.get('username')
+    password = request.form.get('password')
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
+    email = request.form.get('email')
+    phone = request.form.get('phone')
+    user_type = request.form.get('user_type')
+    # TODO: HASH PASSWORD
+    # Insert the new item into the items table
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO users (username, password, first_name, last_name, email, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)", (username, password, first_name, last_name, email, phone, user_type))
+    conn.commit()
+    conn.close()
+
+    # Redirect to the same page or another page
+    return redirect('/search')  # Adjust the URL as needed
 
 
 if __name__ == '__main__':
