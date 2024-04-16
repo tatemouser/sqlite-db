@@ -59,21 +59,19 @@
 
 
 
-    
-    <div class="horizontal-stack">
-    <p>Display All Users</p>
+
         <form action="/show_all_users" method="POST">
             <button type="submit">See All Users</button>
         </form>
-    </div>
-    
-    <div class="horizontal-stack">
-        <p>Check Patron Items</p>
-        <input type="text" name="title" placeholder="ID">
-        <button type="submit">Find User</button>
-    </div>
 
 
+        <form action="/find_user" method="POST">
+            <div class="horizontal-stack">
+                <p>Search</p>
+                <input type="text" name="user_id" placeholder="Enter ID...">
+                <button type="submit" name="user_id" value="CD">See Users</button>
+            </div>
+        </form>
 
 
     {% elif user_info.user_type == 'patron' %}
@@ -102,20 +100,29 @@
         </div>
     {% endif %}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    {% if users %}
+    <h2>Search Results</h2>
+    <div class="all-items-box">
+        <ul>
+            {% for user in users %}
+                <li>
+                    ID: {{ user.user_id }}<br>
+                    Username: {{ user.username }}<br>
+                    Password: {{ user.password }}<br>
+                    First Name: {{ user.first_name }}<br>
+                    Last Name: {{ user.last_name }}<br>
+                    Email: {{ user.email }}<br>
+                    Phone: {{ user.phone }}<br>
+                    User Type: {{ user.user_type }}<br>
+                    <hr>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
     
-    
+    {% else %}
+        <p>No user found with the specified ID.</p>
+    {% endif %}
+
 </body>
 </html>

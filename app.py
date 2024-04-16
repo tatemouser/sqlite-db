@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, jsonify, redirect, session
 from user_manage import login, User
 from init import sys_init
+from datetime import datetime
 import sqlite3
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -134,8 +136,15 @@ def checkout():
     # Update the status of checked items to 'Not Available'
     conn = get_db_connection()
     cursor = conn.cursor()
+    checkout_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current date and time
+    user_id = session.get('user').get('user_id')  # Get the user_id of the current user
+    
     for item_id in checked_items:
         cursor.execute("UPDATE items SET availability = ? WHERE item_id = ?", ('Not Available', item_id))
+        
+        # Insert a new row into the checkouts table
+        cursor.execute("INSERT INTO checkouts (user_id, item_id, checkout_date) VALUES (?, ?, ?)",
+                       (user_id, item_id, checkout_date))
         
     conn.commit()
     conn.close()
@@ -144,23 +153,24 @@ def checkout():
     return redirect('/search')
 
 
+
 @app.route('/show_all_users', methods=['POST'])
-def filter_items():
-    user_type = request.form['user_type']
-    
-    # Query the database for items of the selected type
+def show_all_users():
+    # Query all items from the database
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users")
     users = cursor.fetchall()
     conn.close()
-    
-    # Render the filtered items
+
+    # Render all items
     user_data = session.get('user')
     if user_data:
-        return render_template('search.html')
+        return render_template('search.html', user_info=user_data, users=users)
     else:
         return "Error: User information not found"
+
+
 
 @app.route('/add_item', methods=['POST'])
 def add_item():
@@ -199,6 +209,30 @@ def user():
 
     # Redirect to the same page or another page
     return redirect('/search')  # Adjust the URL as needed
+
+
+
+@app.route('/find_user', methods=['POST'])
+def find_user():
+    user_id = request.form.get('user_id')
+    
+    # Query the database for the user with the specified user_id
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+    users = cursor.fetchall()
+    conn.close()
+    
+    # Render the filtered users
+    user_data = session.get('user')
+    if user_data:
+        return render_template('search.html', user_info=user_data, users=users)
+    else:
+        return "Error: User information not found"
+
+
+
+
 
 
 if __name__ == '__main__':
