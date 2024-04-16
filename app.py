@@ -231,6 +231,27 @@ def find_user():
         return "Error: User information not found"
 
 
+@app.route('/find_checkouts', methods=['POST'])
+def find_checkouts():
+    user_id = request.form.get('user_id')
+    
+    # Query the database for items checked out by the user
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM checkouts WHERE user_id = ?", (user_id,))
+    checkouts = cursor.fetchall()
+    conn.close()
+    
+    # Get user_info from session
+    user_info = session.get('user')
+    
+    # Render the checkouts information
+    return render_template('search.html', user_info=user_info, checkouts=checkouts)
+
+
+
+
+
 
 
 

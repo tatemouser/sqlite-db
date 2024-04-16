@@ -69,9 +69,19 @@
             <div class="horizontal-stack">
                 <p>Search</p>
                 <input type="text" name="user_id" placeholder="Enter ID...">
-                <button type="submit" name="user_id" value="CD">See Users</button>
+                <button type="submit" name="user_id" value="CD">See User Info</button>
             </div>
         </form>
+
+        <form action="/find_checkouts" method="POST">
+            <div class="horizontal-stack">
+                <p>Search</p>
+                <input type="text" name="user_id" placeholder="Enter ID...">
+                <button type="submit">See Items Checked OUt</button>
+            </div>
+        </form>
+
+        
 
 
     {% elif user_info.user_type == 'patron' %}
@@ -119,7 +129,25 @@
             {% endfor %}
         </ul>
     </div>
-    
+    {% else %}
+        <p>No user found with the specified ID.</p>
+    {% endif %}
+
+    {% if checkouts %}
+        <h2>Items Checked Out</h2>
+        <div class="checkout-box">
+            <ul>
+                {% for checkout in checkouts %}
+                    <li>
+                        Checkout ID: {{ checkout.checkout_id }}<br>
+                        User ID: {{ checkout.user_id }}<br>
+                        Item ID: {{ checkout.item_id }}<br>
+                        Checkout Date: {{ checkout.checkout_date }}<br>
+                        Return Date: {{ checkout.return_date }}<br>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     {% else %}
         <p>No user found with the specified ID.</p>
     {% endif %}
