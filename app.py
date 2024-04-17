@@ -193,8 +193,6 @@ def show_all_users():
     else:
         return "Error: User information not found"
 
-
-
 @app.route('/add_item', methods=['POST'])
 def add_item():
     # Get the form data
@@ -233,8 +231,6 @@ def user():
     # Redirect to the same page or another page
     return redirect('/search')  # Adjust the URL as needed
 
-
-
 @app.route('/find_user', methods=['POST'])
 def find_user():
     user_id = request.form.get('user_id')
@@ -263,47 +259,24 @@ def find_checkouts():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM checkouts WHERE user_id = ?", (user_id,))
     checkouts = cursor.fetchall()
+    
+    # Define the get_item_title function
+    def get_item_title(item_id):
+        # Query the database to retrieve the title of the item with the given item_id
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT title FROM items WHERE item_id = ?", (item_id,))
+        row = cursor.fetchone()
+        conn.close()
+        return row[0] if row else "Unknown"
+
     conn.close()
     
     # Get user_info from session
     user_info = session.get('user')
     
     # Render the checkouts information
-    return render_template('search.html', user_info=user_info, checkouts=checkouts)
-
-@app.route('/find_my_checkouts', methods=['POST'])
-def find_my_checkouts():
-    user_id = session.get('user_id')
-    
-    # Query the database for items checked out by the user with ID 1
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM checkouts WHERE user_id = ? AND user_id = user_id", (user_id,))
-    checkouts = cursor.fetchall()
-    conn.close()
-    
-    # Get user_info from session
-    user_info = session.get('user')
-    
-    if not checkouts:
-        return render_template('search.html', user_info=user_info, message="No items found for this user ID.")
-    
-    # Render the checkouts information
-    return render_template('search.html', user_info=user_info, checkouts=checkouts)
-
-
-
-@app.route('/current_user_id')
-def current_user_id():
-    # Get the user ID from the session
-    user_id = session.get('user_id')
-    
-    # Return the user ID as JSON
-    return jsonify({'user_id': user_id})
-
-
-
-
+    return render_template('search.html', user_info=user_info, checkouts=checkouts, get_item_title=get_item_title)
 
 
 

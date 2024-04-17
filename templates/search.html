@@ -5,12 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Search</title>
     <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
-    <script src="checkouts.js"></script>
 </head>
 <body>
-    
-    <h1>Library Search</h1>
+    <a href="/profile" class="btn">Back to Profile</a>
+
+
+
+    <h1>Library Search 📚</h1>
     <hr>
+
+    <form action="/find_checkouts" method="POST">
+        <input type="hidden" name="user_id" value="{{ user_info.id }}">
+        <button type="submit">See My Checked Out</button>
+    </form>
+
     <form action="/filter" method="POST">
         <div class="horizontal-stack">
             <p>Search</p>
@@ -19,14 +27,7 @@
             <button type="submit" name="item_type" value="CD">See All CDs</button>
         </div>
     </form>
-    <form action="/find_checkouts" method="POST">
-        <input type="hidden" name="user_id" value="{{ user_info.id }}">
-        <button type="submit">See My Checked Out</button>
-    </form>
-
     
-
-
 
     <form action="/search" method="POST">
         <div class="horizontal-stack">
@@ -36,72 +37,56 @@
         </div>
     </form>
 
-
-    
-
     <!-- Special features -->
     <p>Add Data</p>
     {% if user_info.user_type == 'librarian' %}
 
-    <form action="/add_item" method="POST">
-        <div class="horizontal-stack">
-            <input type="text" name="title" placeholder="Title...">
-            <input type="text" name="type" placeholder="Type...">
-            <input type="text" name="availability" placeholder="Availability...">
-            <button type="submit">Add Item</button>
-        </div>
-    </form>
-    <form action="/add_user" method="POST">
-        <div class="horizontal-stack">
-            <input type="text" name="username" placeholder="Username...">
-            <input type="text" name="password" placeholder="Password...">
-            <input type="text" name="first_name" placeholder="First Name...">
-            <input type="text" name="last_name" placeholder="Last Name...">
-            <input type="text" name="email" placeholder="Email...">
-            <input type="text" name="phone" placeholder="Phone...">
-            <input type="text" name="user_type" placeholder="User Type...">
-            <button type="submit">Add User</button>
-        </div>
-    </form>
-    
+        <form action="/add_item" method="POST">
+            <div class="horizontal-stack">
+                <input type="text" name="title" placeholder="Title...">
+                <input type="text" name="type" placeholder="Type...">
+                <input type="text" name="availability" placeholder="Availability...">
+                <button type="submit">Add Item</button>
+            </div>
+        </form>
+        
+        <form action="/add_user" method="POST">
+            <div class="horizontal-stack">
+                <input type="text" name="username" placeholder="Username...">
+                <input type="text" name="password" placeholder="Password...">
+                <input type="text" name="first_name" placeholder="First Name...">
+                <input type="text" name="last_name" placeholder="Last Name...">
+                <input type="text" name="email" placeholder="Email...">
+                <input type="text" name="phone" placeholder="Phone...">
+                <input type="text" name="user_type" placeholder="User Type...">
+                <button type="submit">Add User</button>
+            </div>
+        </form>
 
-
-
-
-
-    <form action="/show_all_users" method="POST">
-        <button type="submit">See All Users</button>
-    </form>
-
-
-    <form action="/find_user" method="POST">
-        <div class="horizontal-stack">
-            <p>Search</p>
-            <input type="text" name="user_id" placeholder="Enter ID...">
-            <button type="submit" name="user_id" value="CD">See User Info</button>
-        </div>
-    </form>
+        <form action="/find_user" method="POST">
+            <div class="horizontal-stack">
+                <p>Search</p>
+                <input type="text" name="user_id" placeholder="Enter ID...">
+                <button type="submit" name="user_id" value="CD">See User Info</button>
+            </div>
+        </form>
+            
+        <form action="/find_checkouts" method="POST">
+            <div class="horizontal-stack">
+                <p>Search</p>
+                <input type="text" name="user_id" placeholder="Enter ID...">
+                <button type="submit">See Items Checked Out</button>
+            </div>
+        </form>
 
         
-    <form action="/find_checkouts" method="POST">
-        <div class="horizontal-stack">
-            <p>Search</p>
-            <input type="text" name="user_id" placeholder="Enter ID...">
-            <button type="submit">See Items Checked Out</button>
-        </div>
-    </form>
-
-    
-
-
-
-        
-
-
+        <form action="/show_all_users" method="POST">
+            <button type="submit">Show All Users</button>
+        </form>
     {% elif user_info.user_type == 'patron' %}
     <!-- TODO: Prolly remove -->
     {% else %}
-    <p>Error: Unknown user type</p>
+        <p>Error: Unknown user type</p>
     {% endif %}
 
 
@@ -111,7 +96,7 @@
 
 
 
-
+    <!-- OUTPUTS -->
     {% if items %}
         <h2>Search Results</h2>
         <div class="search-results-box">
@@ -131,26 +116,24 @@
     {% endif %}
 
     {% if users %}
-    <h2>Search Results</h2>
-    <div class="all-items-box">
-        <ul>
-            {% for user in users %}
-                <li>
-                    ID: {{ user.user_id }}<br>
-                    Username: {{ user.username }}<br>
-                    Password: {{ user.password }}<br>
-                    First Name: {{ user.first_name }}<br>
-                    Last Name: {{ user.last_name }}<br>
-                    Email: {{ user.email }}<br>
-                    Phone: {{ user.phone }}<br>
-                    User Type: {{ user.user_type }}<br>
-                    <hr>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% else %}
-        <p>No user found with the specified ID.</p>
+        <h2>Search Results</h2>
+        <div class="all-items-box">
+            <ul>
+                {% for user in users %}
+                    <li>
+                        ID: {{ user.user_id }}<br>
+                        Username: {{ user.username }}<br>
+                        Password: {{ user.password }}<br>
+                        First Name: {{ user.first_name }}<br>
+                        Last Name: {{ user.last_name }}<br>
+                        Email: {{ user.email }}<br>
+                        Phone: {{ user.phone }}<br>
+                        User Type: {{ user.user_type }}<br>
+                        <hr>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
 
     {% if checkouts %}
@@ -158,22 +141,17 @@
         <div class="checkout-box">
             <ul>
                 {% for checkout in checkouts %}
-                    <li>
+                    <strong>Title: {{ get_item_title(checkout.item_id) }}</strong><br>
+                    <div style="margin-left: 20px;"> <!-- Indentation applied here -->
                         Checkout ID: {{ checkout.checkout_id }}<br>
                         User ID: {{ checkout.user_id }}<br>
                         Item ID: {{ checkout.item_id }}<br>
                         Checkout Date: {{ checkout.checkout_date }}<br>
                         Return Date: {{ checkout.return_date }}<br>
-                    </li>
+                    </div>
                 {% endfor %}
             </ul>
         </div>
-    {% else %}
-        <p>No user found with the specified ID.</p>
     {% endif %}
-
-
-
-
 </body>
 </html>
