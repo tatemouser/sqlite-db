@@ -3,6 +3,8 @@ from user_manage import login, User
 from init import sys_init
 from datetime import datetime
 import sqlite3
+from datetime import datetime, timedelta
+
 
 
 app = Flask(__name__)
@@ -107,6 +109,21 @@ def search():
             return "Error: User information not found"
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.route('/filter', methods=['POST'])
 def filter_items():
     item_type = request.form['item_type']
@@ -128,6 +145,9 @@ def filter_items():
 
 @app.route('/checkout', methods=['POST'])
 def checkout():
+    # Retrieve user_id from the form data
+    user_id = request.form.get('user_id')
+
     checked_items = request.form.getlist('checked_items')
     
     if not checked_items:
@@ -136,22 +156,25 @@ def checkout():
     # Update the status of checked items to 'Not Available'
     conn = get_db_connection()
     cursor = conn.cursor()
-    checkout_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current date and time
-    user_id = session.get('user').get('user_id')  # Get the user_id of the current user
+    
+    # Get current date (without time)
+    checkout_date = datetime.now().strftime('%Y-%m-%d')  
+    
+    # Calculate return date (14 days from checkout date)
+    return_date = (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d')
     
     for item_id in checked_items:
         cursor.execute("UPDATE items SET availability = ? WHERE item_id = ?", ('Not Available', item_id))
         
-        # Insert a new row into the checkouts table
-        cursor.execute("INSERT INTO checkouts (user_id, item_id, checkout_date) VALUES (?, ?, ?)",
-                       (user_id, item_id, checkout_date))
+        # Insert a new row into the checkouts table with a default return_date
+        cursor.execute("INSERT INTO checkouts (user_id, item_id, checkout_date, return_date) VALUES (?, ?, ?, ?)",
+                       (user_id, item_id, checkout_date, return_date))
         
     conn.commit()
     conn.close()
     
     # Redirect back to the search page after checkout
     return redirect('/search')
-
 
 
 @app.route('/show_all_users', methods=['POST'])
@@ -247,6 +270,39 @@ def find_checkouts():
     
     # Render the checkouts information
     return render_template('search.html', user_info=user_info, checkouts=checkouts)
+
+@app.route('/find_my_checkouts', methods=['POST'])
+def find_my_checkouts():
+    user_id = session.get('user_id')
+    
+    # Query the database for items checked out by the user with ID 1
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM checkouts WHERE user_id = ? AND user_id = user_id", (user_id,))
+    checkouts = cursor.fetchall()
+    conn.close()
+    
+    # Get user_info from session
+    user_info = session.get('user')
+    
+    if not checkouts:
+        return render_template('search.html', user_info=user_info, message="No items found for this user ID.")
+    
+    # Render the checkouts information
+    return render_template('search.html', user_info=user_info, checkouts=checkouts)
+
+
+
+@app.route('/current_user_id')
+def current_user_id():
+    # Get the user ID from the session
+    user_id = session.get('user_id')
+    
+    # Return the user ID as JSON
+    return jsonify({'user_id': user_id})
+
+
+
 
 
 

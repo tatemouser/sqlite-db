@@ -1,34 +1,47 @@
-document.getElementById('searchForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent form submission
+// Function to fetch user data from the server
+function fetchUsers() {
+    // Make an AJAX request to fetch user data
+    fetch('/fetch_users')
+        .then(response => response.json())
+        .then(data => {
+            // Process the response data
+            displayUsers(data.users);
+        })
+        .catch(error => console.error('Error fetching users:', error));
+}
 
-    // Get search input value
-    var searchInput = document.getElementById('title').value;
+// Function to dynamically display user data
+function displayUsers(users) {
+    const searchResults = document.getElementById('searchResults');
 
-    // Make AJAX call to server
-    fetch('/search', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 'title': searchInput }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Handle server response
-        if (data.status == 'ok') {
-            // Display search results
-            var resultsHTML = '<h2>Search Results</h2><ul>';
-            data.results.forEach(function(item) {
-                resultsHTML += '<li>' + item.title + '</li>';
-            });
-            resultsHTML += '</ul>';
-            document.getElementById('searchResults').innerHTML = resultsHTML;
-        } else {
-            // Display error message
-            document.getElementById('searchResults').innerHTML = '<p>Error: ' + data.message + '</p>';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-});
+    // Clear previous search results
+    searchResults.innerHTML = '';
+
+    // Check if users array is empty
+    if (users.length === 0) {
+        searchResults.innerHTML = '<p>No users found.</p>';
+        return;
+    }
+
+    // Generate HTML for each user and append it to searchResults
+    const userListHTML = users.map(user => `
+        <li>
+            ID: ${user.user_id}<br>
+            Username: ${user.username}<br>
+            Password: ${user.password}<br>
+            First Name: ${user.first_name}<br>
+            Last Name: ${user.last_name}<br>
+            Email: ${user.email}<br>
+            Phone: ${user.phone}<br>
+            User Type: ${user.user_type}<br>
+            <hr>
+        </li>
+    `).join('');
+
+    searchResults.innerHTML = `<ul>${userListHTML}</ul>`;
+}
+
+// Call fetchUsers when the page loads
+window.onload = function() {
+    fetchUsers();
+};
