@@ -44,22 +44,54 @@ def sys_init():
     # Insert some dummy data with hashed passwords
     password1_hash = bcrypt.hashpw(b'secret1', bcrypt.gensalt())
     password2_hash = bcrypt.hashpw(b'secret2', bcrypt.gensalt())
-    cursor.execute(
-        "INSERT INTO users (username, password, first_name, last_name, email, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ('user1', password1_hash, 'John', 'Doe', 'john@example.com',
-         '1234567890', 'librarian'))
-    cursor.execute(
-        "INSERT INTO users (username, password, first_name, last_name, email, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ('user2', password2_hash, 'Jane', 'Smith', 'jane@example.com',
-         '0987654321', 'patron'))
+    password3_hash = bcrypt.hashpw(b'secret3', bcrypt.gensalt())
+    password4_hash = bcrypt.hashpw(b'secret4', bcrypt.gensalt())
+    password5_hash = bcrypt.hashpw(b'secret5', bcrypt.gensalt())
 
-    # Insert some dummy data into items table
-    cursor.execute(
+    # TRADITIONAL WAY TO ADD DATA
+        # ADD ITEM
+            # cursor.execute(
+            #     "INSERT INTO items (title, type, availability) VALUES (?, ?, ?)",
+            #     ('Book1', 'Book', 'Available'))
+        # ADD USER
+            # cursor.execute(
+            #     "INSERT INTO users (username, password, first_name, last_name, email, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            #     ('user1', password1_hash, 'John', 'Doe', 'john@example.com',
+            #      '1234567890', 'librarian'))
+
+    # ADD DATA TO USERS ITEMS AND CHEKOUTS TABLE
+    # ADD 5 USERS
+    users = [
+        ('user1', password1_hash, 'John', 'Doe', 'john@example.com', '1234567890', 'librarian'),
+        ('user2', password2_hash, 'Jane', 'Smith', 'jane@example.com', '0987654321', 'patron'),
+        ('user3', password3_hash, 'Alice', 'Johnson', 'alice@example.com', '9876543210', 'patron'),
+        ('user4', password4_hash, 'Bob', 'Brown', 'bob@example.com', '0123456789', 'librarian'),
+        ('user5', password5_hash, 'Emma', 'Davis', 'emma@example.com', '5555555555', 'patron')
+    ]
+
+    cursor.executemany(
+        "INSERT INTO users (username, password, first_name, last_name, email, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        users
+    )
+
+    # ADD 10 TO ITEMS
+    items = [
+        ('Long Book', 'Book', 'Not Available'),
+        ('Fast Movie', 'DVD', 'Not Available'),
+        ('Quick Song', 'CD', 'Available'),
+        ('Diary', 'Book', 'Available'),
+        ('Quiz Help', 'DVD', 'Available'),
+        ('Noahs Song', 'CD', 'Available'),
+        ('Bible', 'Book', 'Available'),
+        ('Code tutorial', 'DVD', 'Available'),
+        ('Hello World', 'CD', 'Available'),
+        ('Bible Part 2', 'Book', 'Available')
+    ]
+
+    cursor.executemany(
         "INSERT INTO items (title, type, availability) VALUES (?, ?, ?)",
-        ('Book1', 'Book', 'Available'))
-    cursor.execute(
-        "INSERT INTO items (title, type, availability) VALUES (?, ?, ?)",
-        ('DVD1', 'DVD', 'Available'))
+        items
+    )
 
     # Insert some dummy data into checkouts table
     cursor.execute(

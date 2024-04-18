@@ -98,6 +98,7 @@ def search():
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM items WHERE title LIKE ?", ('%' + title + '%',))
+        
         items = cursor.fetchall()
         conn.close()
         
