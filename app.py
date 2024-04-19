@@ -82,6 +82,7 @@ def logout():
     session.clear()
     return redirect('/')
 
+
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'GET':
@@ -93,21 +94,27 @@ def search():
     elif request.method == 'POST':
         # Get the search query from the form
         title = request.form['title']
-        
-        # Query the database for items with matching title
+
+        # Create a parameterized query
+        query = "SELECT * FROM items WHERE title LIKE ?"
+
+        # Connect to the database
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM items WHERE title LIKE ?", ('%' + title + '%',))
-        
+
+        # Execute the query with safe parameters with wildcards
+        cursor.execute(query, ('%' + title + '%',))
+
         items = cursor.fetchall()
         conn.close()
-        
+
         # Render the search results
         user_data = session.get('user')
         if user_data:
             return render_template('search.html', user_info=user_data, items=items)
         else:
             return "Error: User information not found"
+
 
 
 
@@ -143,6 +150,7 @@ def filter_items():
     else:
         return "Error: User information not found"
     
+
 
 @app.route('/checkout', methods=['POST'])
 def checkout():
@@ -196,53 +204,73 @@ def show_all_users():
 
 @app.route('/add_item', methods=['POST'])
 def add_item():
-    # Get the form data
-    title = request.form.get('title')
-    item_type = request.form.get('type')
-    availability = request.form.get('availability', 'Available')  # Default to 'Available' if not provided
+    # Get the form data with validation (consider adding more as needed)
+    title = request.form.get('title', '').strip()  # Remove leading/trailing whitespaces
+    item_type = request.form.get('type', '').strip()
+    availability = request.form.get('availability', 'Available').strip()
 
-    # Insert the new item into the items table
+    # Create a parameterized query
+    query = "INSERT INTO items (title, type, availability) VALUES (?, ?, ?)"
+
+    # Connect to the database
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO items (title, type, availability) VALUES (?, ?, ?)", (title, item_type, availability))
+
+    # Execute the query with safe parameters
+    cursor.execute(query, (title, item_type, availability))
     conn.commit()
     conn.close()
 
     # Redirect to the same page or another page
     return redirect('/search')  # Adjust the URL as needed
+
 
 @app.route('/add_user', methods=['POST'])
-def user():
-    # Get the form data
-    username = request.form.get('username')
-    password = request.form.get('password')
-    first_name = request.form.get('first_name')
-    last_name = request.form.get('last_name')
-    email = request.form.get('email')
-    phone = request.form.get('phone')
-    user_type = request.form.get('user_type')
-    # TODO: HASH PASSWORD
-    # Insert the new item into the items table
+def add_user():
+    # Get the form data with basic validation (consider adding more as needed)
+    username = request.form.get('username', '').strip()
+    first_name = request.form.get('first_name', '').strip()
+    last_name = request.form.get('last_name', '').strip()
+    email = request.form.get('email', '').strip()
+    phone = request.form.get('phone', '').strip()  # Assuming phone is not mandatory
+    user_type = request.form.get('user_type', '').strip()
+
+    # Create a parameterized query
+    query = "INSERT INTO users (username, password, first_name, last_name, email, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)"
+
+    # Connect to the database
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO users (username, password, first_name, last_name, email, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)", (username, password, first_name, last_name, email, phone, user_type))
+
+    # TODO:
+    # Hash the password before storing it (crucial!)
+    # Replace this with your preferred hashing algorithm (e.g., bcrypt)
+    hashed_password = hash_password(password)  # Implement a secure hashing function
+
+    # Execute the query with safe parameters
+    cursor.execute(query, (username, hashed_password, first_name, last_name, email, phone, user_type))
     conn.commit()
     conn.close()
 
-    # Redirect to the same page or another page
-    return redirect('/search')  # Adjust the URL as needed
+    # Redirect to the same page or another page (consider success/error message)
+    return redirect('/login')  # Adjust URL as needed
 
 @app.route('/find_user', methods=['POST'])
 def find_user():
     user_id = request.form.get('user_id')
-    
-    # Query the database for the user with the specified user_id
+
+    # Create a parameterized query
+    query = "SELECT * FROM users WHERE user_id = ?"
+
+    # Connect to the database
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+
+    # Execute the query with safe parameters
+    cursor.execute(query, (user_id,))
     users = cursor.fetchall()
     conn.close()
-    
+
     # Render the filtered users
     user_data = session.get('user')
     if user_data:
@@ -254,29 +282,28 @@ def find_user():
 @app.route('/find_checkouts', methods=['POST'])
 def find_checkouts():
     user_id = request.form.get('user_id')
-    
-    # Query the database for items checked out by the user
+
+    # Query the database for items checked out by the user (parameterized)
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM checkouts WHERE user_id = ?", (user_id,))
     checkouts = cursor.fetchall()
-    
-    # Define the get_item_title function
+    conn.close()
+
+    # Get user info from session
+    user_info = session.get('user')
+
+    # Improved get_item_title function using a parameterized query
     def get_item_title(item_id):
-        # Query the database to retrieve the title of the item with the given item_id
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT title FROM items WHERE item_id = ?", (item_id,))
+        query = "SELECT title FROM items WHERE item_id = ?"
+        cursor.execute(query, (item_id,))
         row = cursor.fetchone()
         conn.close()
         return row[0] if row else "Unknown"
 
-    conn.close()
-    
-    # Get user_info from session
-    user_info = session.get('user')
-    
-    # Render the checkouts information
+    # Render the checkouts information with the secure get_item_title function
     return render_template('search.html', user_info=user_info, checkouts=checkouts, get_item_title=get_item_title)
 
 
