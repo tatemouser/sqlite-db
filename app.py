@@ -4,6 +4,8 @@ from init import sys_init
 from datetime import datetime
 import sqlite3
 from datetime import datetime, timedelta
+import bcrypt
+
 
 
 
@@ -172,6 +174,15 @@ def checkout():
     # Calculate return date (14 days from checkout date)
     return_date = (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d')
     
+    # Check if there are already 5 checkouts for the user
+    cursor.execute("SELECT COUNT(*) FROM checkouts WHERE user_id = ?", (user_id,))
+    # Fetch the result of the COUNT query and extract the count value
+    num_checkouts = cursor.fetchone()[0]
+    
+    if num_checkouts >= 5:
+        conn.close()
+        return redirect('/search')
+    
     for item_id in checked_items:
         cursor.execute("UPDATE items SET availability = ? WHERE item_id = ?", ('Not Available', item_id))
         
@@ -181,6 +192,7 @@ def checkout():
         
     conn.commit()
     conn.close()
+
     
     # Redirect back to the search page after checkout
     return redirect('/search')
@@ -245,7 +257,8 @@ def add_user():
     # TODO:
     # Hash the password before storing it (crucial!)
     # Replace this with your preferred hashing algorithm (e.g., bcrypt)
-    hashed_password = hash_password(password)  # Implement a secure hashing function
+    password1_hash = bcrypt.hashpw(b'secret1', bcrypt.gensalt())
+    hashed_password = password1_hash  # Implement a secure hashing function
 
     # Execute the query with safe parameters
     cursor.execute(query, (username, hashed_password, first_name, last_name, email, phone, user_type))
@@ -253,7 +266,7 @@ def add_user():
     conn.close()
 
     # Redirect to the same page or another page (consider success/error message)
-    return redirect('/login')  # Adjust URL as needed
+    return redirect('/search')  # Adjust URL as needed
 
 @app.route('/find_user', methods=['POST'])
 def find_user():

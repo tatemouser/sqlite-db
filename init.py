@@ -42,7 +42,7 @@ def sys_init():
     ''')
 
     # Insert some dummy data with hashed passwords
-    password1_hash = bcrypt.hashpw(b'secret1', bcrypt.gensalt())
+    password1_hash = bcrypt.hashpw(b'me', bcrypt.gensalt())
     password2_hash = bcrypt.hashpw(b'secret2', bcrypt.gensalt())
     password3_hash = bcrypt.hashpw(b'secret3', bcrypt.gensalt())
     password4_hash = bcrypt.hashpw(b'secret4', bcrypt.gensalt())
