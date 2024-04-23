@@ -1,26 +1,26 @@
 from flask import Flask, render_template, request, jsonify, redirect, session
-from user_manage import login, User
-from init import sys_init
-from datetime import datetime
-import sqlite3
-from datetime import datetime, timedelta
-import bcrypt
+from user_manage import login, User  # Authenticate User class and login function
+from init import sys_init  # To load data
+from datetime import datetime, timedelta  # To get checkout times
+import sqlite3  
+import bcrypt 
+import re  # Import the regular expression module
 
 
-
-
+# Create Flask instances and key for secure sign in
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Define a function to connect to the SQLite database
 def get_db_connection():
     conn = sqlite3.connect('users.db')
     conn.row_factory = sqlite3.Row
     return conn
 
+# Load dummy data
 with app.app_context():
     sys_init()
 
+# Base directory route for login page
 @app.route('/')
 def index():
     if request.args:
@@ -28,21 +28,22 @@ def index():
     else:
         return render_template('index.html', messages='')
 
+# Handle AJAX request
+# Store user data in session for authentication and 
 @app.route('/ajaxkeyvalue', methods=['POST'])
 def ajax():
-    data = request.json  # Assuming the AJAX request sends JSON data
-    print(data)
-    # Process the data
+    # Process JSON data from the request
+    data = request.json
+    # Extraction
     username = data['username']
     password = data['password']
 
-    print(username)
-    print(password)
-
+    # Authenticate
     user = login(username, password)
     if not user:
         response_data = {'status': 'fail'}
     else:
+        # Store
         session['logged_in'] = True
         session['username'] = username
         session['user'] = {
@@ -54,15 +55,19 @@ def ajax():
             'phone': user.phone,
             'user_type': user.user_type
         }
-
         response_data = {'status': 'ok', 'user': user.to_json()}
+    return jsonify(response_data) 
 
-    return jsonify(response_data)
 
+
+
+
+# --------------------------------------
+# LOGIN PAGES
+# ---------------------------------------
 @app.route('/profile')
 def profile():
     user_data = session.get('user')
-
     if user_data:
         # Reconstruct the user object
         user = User(user_id=user_data['id'], username=user_data['username'],
@@ -85,6 +90,18 @@ def logout():
     return redirect('/')
 
 
+
+
+
+
+# --------------------------------------
+# FUNCTIONS USE BY LIBRARIAN AND PATRON
+# 
+# Search Items  
+# Show all of type - filter
+# Checkout 
+# ---------------------------------------
+
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'GET':
@@ -97,7 +114,11 @@ def search():
         # Get the search query from the form
         title = request.form['title']
 
-        # Create a parameterized query
+        # Perform input validation
+        if not validate_title(title):
+            return "Error: Invalid input"
+        
+        # Create a parameterized query with ? as a placeholder
         query = "SELECT * FROM items WHERE title LIKE ?"
 
         # Connect to the database
@@ -117,23 +138,6 @@ def search():
         else:
             return "Error: User information not found"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @app.route('/filter', methods=['POST'])
 def filter_items():
     item_type = request.form['item_type']
@@ -152,8 +156,6 @@ def filter_items():
     else:
         return "Error: User information not found"
     
-
-
 @app.route('/checkout', methods=['POST'])
 def checkout():
     # Retrieve user_id from the form data
@@ -192,11 +194,22 @@ def checkout():
         
     conn.commit()
     conn.close()
-
     
     # Redirect back to the search page after checkout
     return redirect('/search')
 
+
+
+
+# --------------------------------------
+# LIBRARIAN ONLY FUNCTIONS
+#
+# Show all Users
+# Add Item
+# Add User
+# Find User with ID
+# Find Checkouts with User ID
+# ---------------------------------------
 
 @app.route('/show_all_users', methods=['POST'])
 def show_all_users():
@@ -221,6 +234,10 @@ def add_item():
     item_type = request.form.get('type', '').strip()
     availability = request.form.get('availability', 'Available').strip()
 
+    # Perform input validation
+    if not (validate_title(title) and validate_title(item_type) and validate_title(availability)):
+        return "Error: Invalid input"
+
     # Create a parameterized query
     query = "INSERT INTO items (title, type, availability) VALUES (?, ?, ?)"
 
@@ -236,7 +253,6 @@ def add_item():
     # Redirect to the same page or another page
     return redirect('/search')  # Adjust the URL as needed
 
-
 @app.route('/add_user', methods=['POST'])
 def add_user():
     # Get the form data with basic validation (consider adding more as needed)
@@ -247,6 +263,12 @@ def add_user():
     phone = request.form.get('phone', '').strip()  # Assuming phone is not mandatory
     user_type = request.form.get('user_type', '').strip()
 
+    # Get the password from the form data
+    password = request.form.get('password', '').encode('utf-8')  # Ensure UTF-8 encoding for consistency
+
+    if not (validate_title(username) and validate_title(first_name) and validate_title(last_name) and validate_title(email) and validate_title(phone) and validate_title(user_type)):
+        return "Error: Invalid input"
+
     # Create a parameterized query
     query = "INSERT INTO users (username, password, first_name, last_name, email, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)"
 
@@ -254,11 +276,8 @@ def add_user():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # TODO:
-    # Hash the password before storing it (crucial!)
-    # Replace this with your preferred hashing algorithm (e.g., bcrypt)
-    password1_hash = bcrypt.hashpw(b'secret1', bcrypt.gensalt())
-    hashed_password = password1_hash  # Implement a secure hashing function
+    # Hash the password before storing it 
+    hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
 
     # Execute the query with safe parameters
     cursor.execute(query, (username, hashed_password, first_name, last_name, email, phone, user_type))
@@ -271,6 +290,9 @@ def add_user():
 @app.route('/find_user', methods=['POST'])
 def find_user():
     user_id = request.form.get('user_id')
+
+    if not validate_title(user_id):
+        return "Error: Invalid input"
 
     # Create a parameterized query
     query = "SELECT * FROM users WHERE user_id = ?"
@@ -291,10 +313,12 @@ def find_user():
     else:
         return "Error: User information not found"
 
-
 @app.route('/find_checkouts', methods=['POST'])
 def find_checkouts():
     user_id = request.form.get('user_id')
+
+    if not validate_title(user_id):
+        return "Error: Invalid input"
 
     # Query the database for items checked out by the user (parameterized)
     conn = get_db_connection()
@@ -324,7 +348,18 @@ def find_checkouts():
 
 
 
+# --------------------------------------
+# FUNCTIONS FOR SECURITY
+# --------------------------------------
+def validate_title(title):
+    # Check if the title is not empty and contains only alphanumeric characters and spaces
+    if title.strip() and re.match(r'^[a-zA-Z0-9\s]+$', title):
+        return True
+    else:
+        return False
 
 
+
+# Start application in debug mode
 if __name__ == '__main__':
     app.run(debug=True)
