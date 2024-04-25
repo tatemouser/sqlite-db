@@ -8,6 +8,10 @@ import re  # Import the regular expression module
 
 
 # Create Flask instances and key for secure sign in
+
+# KEY NOTES:    Set secret key for session security
+#               Key holds session cookies, enhancing security by only allow data access from server.
+#               Help with user authentication tokens or other session-specific data.
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
@@ -16,9 +20,6 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# Load dummy data
-with app.app_context():
-    sys_init()
 
 # Base directory route for login page
 @app.route('/')
@@ -29,7 +30,7 @@ def index():
         return render_template('index.html', messages='')
 
 # Handle AJAX request
-# Store user data in session for authentication and 
+# Store user data in session for authentication 
 @app.route('/ajaxkeyvalue', methods=['POST'])
 def ajax():
     # Process JSON data from the request
@@ -66,6 +67,7 @@ def ajax():
 # LOGIN PAGES
 # ---------------------------------------
 @app.route('/profile')
+# Endpoint 
 def profile():
     user_data = session.get('user')
     if user_data:
@@ -362,4 +364,4 @@ def validate_title(title):
 
 # Start application in debug mode
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

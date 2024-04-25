@@ -10,12 +10,168 @@
 <body>
     <h1>Library Login</h1>
     <div id = "msgs">{{messages}}</div>
+    <div class="login-container">
     <label for="password">Username:</label>
-    <input type="text" id="username" name="username" /><br/><br/>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" /><br/><br/>
-    <button type="submit" id="login">Login</button>
+        <input type="text" id="username" name="username" /><br/><br/>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" class="input default_button" /><br/><br/>
+        <button type="submit" id="login" class="btn">Login</button>
 
+    </div>
+
+    <section class="dummy-data-section">
+        <h2>Dummy Data</h2>
+        <h3>Users</h3>
+        <table class="dummy-data-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Password</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>User Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>user1</td>
+              <td>Ilovetocode1</td>
+              <td>John</td>
+              <td>Doe</td>
+              <td>john@example.com</td>
+              <td>1234567890</td>
+              <td>librarian</td>
+            </tr>
+            <tr>
+              <td>user2</td>
+              <td>Ilovetocode2</td>
+              <td>Jane</td>
+              <td>Smith</td>
+              <td>jane@example.com</td>
+              <td>0987654321</td>
+              <td>patron</td>
+            </tr>
+            <tr>
+              <td>user3</td>
+              <td>Ilovetocode3</td>
+              <td>Alice</td>
+              <td>Johnson</td>
+              <td>alice@example.com</td>
+              <td>9876543210</td>
+              <td>patron</td>
+            </tr>
+            <tr>
+              <td>user4</td>
+              <td>Ilovetocode4</td>
+              <td>Bob</td>
+              <td>Brown</td>
+              <td>bob@example.com</td>
+              <td>0123456789</td>
+              <td>librarian</td>
+            </tr>
+            <tr>
+              <td>user5</td>
+              <td>Ilovetocode5</td>
+              <td>Emma</td>
+              <td>Davis</td>
+              <td>emma@example.com</td>
+              <td>5555555555</td>
+              <td>patron</td>
+            </tr>
+          </tbody>
+        </table>
+        <h3>Items</h3>
+        <table class="dummy-data-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Availability</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Long Book</td>
+              <td>Book</td>
+              <td>Not Available</td>
+            </tr>
+            <tr>
+              <td>Fast Movie</td>
+              <td>DVD</td>
+              <td>Not Available</td>
+            </tr>
+            <tr>
+              <td>Quick Song</td>
+              <td>CD</td>
+              <td>Available</td>
+            </tr>
+            <tr>
+              <td>Diary</td>
+              <td>Book</td>
+              <td>Available</td>
+            </tr>
+            <tr>
+              <td>Quiz Help</td>
+              <td>DVD</td>
+              <td>Available</td>
+            </tr>
+            <tr>
+              <td>Noah's Song</td>
+              <td>CD</td>
+              <td>Available</td>
+            </tr>
+            <tr>
+              <td>Bible</td>
+              <td>Book</td>
+              <td>Available</td>
+            </tr>
+            <tr>
+              <td>Code tutorial</td>
+              <td>DVD</td>
+              <td>Available</td>
+            </tr>
+            <tr>
+              <td>Hello World</td>
+              <td>CD</td>
+              <td>Available</td>
+            </tr>
+            <tr>
+              <td>Bible Part 2</td>
+              <td>Book</td>
+              <td>Available</td>
+            </tr>
+          </tbody>
+        </table>
+        <h3>Checkouts</h3>
+        <table class="dummy-data-table">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Item ID</th>
+              <th>Checkout Date</th>
+              <th>Return Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>1</td>
+              <td>2024-04-10</td>
+              <td>2024-04-20</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>2</td>
+              <td>2024-04-10</td>
+              <td>2024-04-20</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    <!-- Handle AJAX Requests -->
     <script src="{{url_for('static',filename='js/script.js')}}"></script>
 </body>
 </html>
