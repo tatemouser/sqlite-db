@@ -45,10 +45,34 @@
     <!----------------------------------
     FUNCTIONS FOR LIBRARIAN ONLY
     ------------------------------------>    
+    <h2>Librarian Actions</h2>
     <hr>
     {% if user_info.user_type == 'librarian' %}
-        <div style="width: 50%;">
+        <div style="width: 70%;">
+            <form action="/add_user" method="POST">
+                <div class="horizontal-stack">
+                    <button type="submit">Add User</button>
+                    <input type="text" name="username" placeholder="Username">
+                    <input type="text" name="password" placeholder="Password">
+                    <input type="text" name="first_name" placeholder="First">
+                    <input type="text" name="last_name" placeholder="Last">
+                    <input type="text" name="email" placeholder="Email">
+                    <input type="text" name="phone" placeholder="Phone">
+                    <input type="text" name="user_type" placeholder="Type">
+                </div>
+            </form>
+            
+            <form action="/add_item" method="POST">
+                <div class="horizontal-stack">
+                    <button type="submit">Add Item</button>
+                    <input type="text" name="title" placeholder="Title...">
+                    <input type="text" name="type" placeholder="Type...">
+                    <input type="text" name="availability" placeholder="Availability...">
+                </div>
+            </form>
+        </div>
 
+        <div style="width: 30%;">
             <form action="/find_user" method="POST">
                 <div class="horizontal-stack">
                     <button type="submit" name="user_id" style="width:300px">See User Info</button>
@@ -63,36 +87,10 @@
                 </div>
             </form>
 
-            <div class="horizontal-stack">
-                <form action="/add_user" method="POST">
-                    <div class="vertical-stack">
-                        <button type="submit">Add User</button>
-                        <input type="text" name="username" placeholder="Username">
-                        <input type="text" name="password" placeholder="Password">
-                        <input type="text" name="first_name" placeholder="First">
-                        <input type="text" name="last_name" placeholder="Last">
-                        <input type="text" name="email" placeholder="Email">
-                        <input type="text" name="phone" placeholder="Phone">
-                        <input type="text" name="user_type" placeholder="Type">
-                    </div>
-                </form>
-                
-                <form action="/add_item" method="POST">
-                    <div class="vertical-stack">
-                        <button type="submit">Add Item</button>
-                        <input type="text" name="title" placeholder="Title...">
-                        <input type="text" name="type" placeholder="Type...">
-                        <input type="text" name="availability" placeholder="Availability...">
-                    </div>
-                </form>
-            </div>
-
+            <form class="form-button-format" action="/show_all_users" method="POST">
+                <button type="submit">Show All Users</button>
+            </form>
         </div>
-
-
-        <form class="form-button-format" action="/show_all_users" method="POST">
-            <button type="submit">Show All Users</button>
-        </form>
 
     {% elif user_info.user_type == 'patron' %}
         <!-- Should never reach edge case -->
